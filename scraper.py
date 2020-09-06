@@ -6,15 +6,15 @@ import pandas as pd
 
 class CraigSearch:
     
-    def __init__(self, craigslist_landing_url, search_terms):
+    def __init__(self, craigslist_landing_url = None):
 
         self.craigslist_site = craigslist_landing_url
-        self.search_terms = search_terms
+        self.search_terms = None
         self.category_selection = None 
         self.category_dict = None
         self.categories = None
 
-    def get_categories(self):
+    def start(self):
         
         response = requests.get(self.craigslist_site)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -29,9 +29,10 @@ class CraigSearch:
         
         print(self.categories)
     
-    def set_category(self, selection):
+    def set_params(self, category, search_terms):
 
-        self.category_selection = selection
+        self.category_selection = category
+        self.search_terms = search_terms
 
     def get_results(self):
         
@@ -48,8 +49,8 @@ class CraigSearch:
         response = requests.get(entry_url)
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        #next_button_url = soup.find('a', {'class': 'button next'}).get('href')
-        max_page = int(soup.find('span', {'class':'totalcount'}).text)  #find max page
+       
+        max_page = int(soup.find('span', {'class':'totalcount'}).text)  
         current_page_to = 0
         
         dates = []
@@ -69,13 +70,10 @@ class CraigSearch:
             soup = BeautifulSoup(response.text, 'html.parser')
             
             boxes = soup.findAll('li', {'class':'result-row'})
-            # a_elems = [i.find('a') for i in boxes]
+        
             result_info = [i.find('p') for  i in boxes]
             page_links = [i.find('a',{'class':'result-title hdrlnk'}).get('href') for i in result_info] 
-            # dates = [i.find('time', {'class':'result-date'}).get('datetime') for i in result_info]
-            # prices = [i.find('span', {'class':'result-price'}).text.replace('$','') for i in result_info]
-            # titles = [i.find('a',{'class':'result-title hdrlnk'}).text for i in result_info] 
-            # neighborhoods = []
+            
             for i in boxes:
                 try:
                     neighborhoods.append(i.find('span', {'class':'result-hood'}).text)
